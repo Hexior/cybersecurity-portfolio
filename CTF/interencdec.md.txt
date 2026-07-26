@@ -1,0 +1,24 @@
+# interencdec
+
+## Category
+Cryptography
+
+## Description
+
+The message was encoded multiple times.
+
+## Steps
+
+1. Downloaded the file.
+2. Determined it was Base64.
+3. Wrote a Python script to decode it.
+4. Found that Base64 was applied twice.
+5. After decoding, recognized the Caesar cipher.
+6. Wrote a brute-force script for all 26 shifts.
+7. Obtained the flag.
+
+## Skills
+
+- Base64
+- Caesar Cipher
+- Python

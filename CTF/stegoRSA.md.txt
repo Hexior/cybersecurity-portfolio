@@ -1,0 +1,24 @@
+# StegoRSA
+
+## Category
+Cryptography
+
+## Description
+
+RSA private key was hidden inside an image.
+
+## Steps
+
+1. Downloaded the encrypted file and the image.
+2. Found hidden hexadecimal data inside the image.
+3. Converted the hex data back into an RSA private key.
+4. Saved the key as private.pem.
+5. Used OpenSSL to decrypt flag.enc.
+6. Obtained the flag.
+
+## Skills
+
+- RSA
+- OpenSSL
+- Hex
+- Steganography

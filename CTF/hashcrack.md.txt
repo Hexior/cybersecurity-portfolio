@@ -1,0 +1,17 @@
+# hashcrack
+
+## Tools
+- Netcat (nc)
+- CrackStation
+
+## Steps
+1. Connected to the server using Netcat.
+2. Received three password hashes.
+3. Identified the hash type.
+4. Used CrackStation to recover the passwords.
+5. Submitted the passwords and received the flag.
+
+## Skills
+- Netcat
+- Hash identification
+- Password hash cracking

@@ -1,0 +1,19 @@
+# 13
+
+## Category
+Cryptography
+
+## Description
+
+The message was encrypted using ROT13.
+
+## Steps
+
+1. Recognized the ROT13 cipher.
+2. Visited the DenCode website and decoded ROT13.
+3. Obtained the flag.
+
+## Skills
+
+- ROT13
+- Python

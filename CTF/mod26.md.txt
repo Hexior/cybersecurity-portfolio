@@ -1,0 +1,20 @@
+# Mod26
+
+## Category
+Cryptography
+
+## Description
+
+The message was encrypted using the Caesar cipher.
+
+## Steps
+
+1. Identified the Caesar cipher.
+2. Brute-forced all 26 shifts.
+3. Found the correct plaintext.
+4. Obtained the flag.
+
+## Skills
+
+- Caesar Cipher
+- Brute Force
