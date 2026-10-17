@@ -1,0 +1,23 @@
+**Objective:** Bypass a blacklist to gain access to the admin panel at `http://localhost/admin`, then delete the user `carlos`.
+
+**Vulnerability:** SSRF. The site features a stock-checking function that accepts a URL via the `stockApi` parameter. A blacklist blocks `localhost`, `127.0.0.1`, and the string `admin`.
+
+**Steps taken:**
+1. Intercepted the request using Burp Suite.
+2. Attempted `stockApi=http://127.0.0.1/` — blocked.
+3. Bypassed the IP block by using `http://127.1/` (a shorthand representation).
+4. Attempted `stockApi=http://127.1/admin` — blocked (the blacklist blocks the string `admin`).
+5. Bypassed the block on the string `admin` by applying double URL-encoding to the letter `a`:
+- `a` → `%61` (standard encoding)
+- `%61` → `%2561` (double encoding)
+6. Sent the payload `stockApi=http://127.1/%2561dmin` — successfully accessed the admin panel.
+7. Located the URL for deleting the user `carlos` and executed it.
+
+
+**Payload:**
+stockApi=http://127.1/%2561dmin/delete?username=carlos
+
+
+**Why it worked:**
+- `127.1` is an alternative representation of `127.0.0.1` that is not caught by the blacklist.
+- `%2561` is the double URL-encoded form of the letter `a`. The filter sees `%2561` and does not recognize the word `admin`, but the server receives `admin` after decoding.

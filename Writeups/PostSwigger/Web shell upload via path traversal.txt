@@ -1,0 +1,36 @@
+**Objective:** Upload a PHP web shell via the avatar upload form and execute it to read Carlos's secret.
+
+**Vulnerability:** File Upload + Path Traversal. The site does not validate the file type and allows directory traversal via URL encoding.
+
+**Steps taken:**
+1. Logged into my account and uploaded a standard image as an avatar.
+2. Intercepted the request in Burp Suite and observed that the image is stored at `/files/avatars/<image>`.
+3. Created a PHP file named `exploit.php` containing the following code:
+<?php echo file_get_contents('/home/carlos/secret'); ?>
+
+Uploaded this file as an avatar (the site did not block the PHP file).
+
+Attempted to access `/files/avatars/exploit.php` — the server returned the code as plain text (it did not execute).
+
+In the `POST /my-account/avatar` request, changed the filename to `filename="../exploit.php"`.
+
+The server stripped the `../` from the filename (sanitization).
+
+Encoded the `/` character as `%2f`: `filename="..%2fexploit.php"`.
+
+The server decoded `%2f` back into `/` and saved the file at `/files/exploit.php`.
+
+Accessed `/files/exploit.php` — the PHP code executed and returned Carlos's secret.
+
+
+Payload:
+Content-Disposition: form-data; name="avatar"; filename="..%2fexploit.php"
+
+
+Why it worked:
+
+The site does not validate the file type, allowing the PHP file to be uploaded.
+
+The `/files/avatars/` directory does not execute PHP, but the `/files/` directory does. The server removes `../` but does not decode `%2f` before sanitization.
+
+URL encoding made it possible to bypass sanitization and upload a file one level higher.

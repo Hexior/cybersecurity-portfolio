@@ -1,0 +1,19 @@
+**Objective:** Execute the `whoami` command on the server, where the output is not visible in the response.
+
+**Vulnerability:** Blind OS Command Injection in the `email` parameter.
+
+**Actions Taken:**
+1. Intercepted the `POST /feedback/submit` request using Burp Suite.
+2. Injected `x||whoami>/var/www/images/output.txt||` into the `email` parameter.
+3. The server executed the command and wrote the result to a file.
+4. Accessed the file via the browser: `http://<IP>/images/text.txt`.
+5. Retrieved the output of the `whoami` command.
+
+**Payload:**
+email=x||whoami>/var/www/images/text.txt||
+
+**Why it worked:**
+- The server fails to properly validate the `email` input.
+- The `||` operator allows for the execution of a second command.
+- The `>` operator redirects the output to a file.
+- The file is accessible via a URL.

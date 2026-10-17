@@ -1,0 +1,21 @@
+**Objective:** Execute a command on the server where the output is not visible in the response. Use a time-based technique to confirm the vulnerability.
+
+**Vulnerability:** Blind OS Command Injection in the `email` parameter.
+
+**Actions taken:**
+1. Intercepted the `POST /feedback/submit` request using Burp Suite.
+2. Identified the parameters: `csrf`, `name`, `email`, `subject`, `message`.
+3. Attempted to inject `; sleep 10` into the `email` parameter — the server returned "Missing parameter" (as the email format was invalidated).
+4. Tried `x||ping -c 10 127.0.0.1||` — the server responded after a 10-second delay.
+5. This confirmed that the `email` parameter is vulnerable to Command Injection.
+
+
+**Payload:**
+email=x||ping+-c+10+127.0.0.1||
+
+
+**Why it worked:**
+- The server does not properly validate the `email` input.
+- The `||` operator allows for the execution of a second command.
+- `ping -c 10 127.0.0.1` introduces a 10-second delay.
+- The delay in the response confirms that the command was executed.

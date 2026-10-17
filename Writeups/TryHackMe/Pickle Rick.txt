@@ -1,0 +1,72 @@
+OS: Linux
+Date: 08.9.2026
+
+1. Reconnaissance
+
+Nmap scan:
+
+nmap -sV -sC -p- <IP>
+
+Open ports:
+
+22 (SSH)  — OpenSSH
+80 (HTTP) — Apache httpd
+2. Enumeration
+
+Web page source (view-source:http://<IP>) contains a hidden comment with a username:
+
+Username: R1ckRul3s
+
+robots.txt:
+
+http://<IP>/robots.txt
+
+Contains a string that turns out to be the password:
+
+Wubbalubbadubdub
+3. Exploitation
+
+Logged into the web portal (login page) with:
+
+Username: R1ckRul3s
+Password: Wubbalubbadubdub
+
+The portal exposes a command execution panel (simulated terminal in the web app). Since it’s limited to one command at a time (no pipes/chaining), enumerate the filesystem step by step:
+
+ls
+cat "Sup3rS3cretPickl3Ingred.txt"   # Ingredient #1
+
+Continue exploring directories (cd, ls, cat) to find:
+
+Ingredient #2 — found elsewhere on the filesystem (e.g. in a hidden file)
+Ingredient #3 — located in /root, requires elevated access to read
+4. Privilege Escalation
+
+Since the webshell runs as www-data, checked sudo rights:
+
+sudo -l
+
+Result: www-data can run all commands as root with no password:
+
+(ALL) NOPASSWD: ALL
+
+Escalated directly:
+
+sudo su
+
+Now root — read the final ingredient from /root:
+
+cat /root/3rd.txt
+5. Flags
+
+This room uses three “ingredient” flags instead of the usual user/root split:
+
+Ingredient #1 — Sup3rS3cretPickl3Ingred.txt
+Ingredient #2 — found during filesystem enumeration
+Ingredient #3 — /root/3rd.txt (requires root)
+6. Lessons Learned
+robots.txt and HTML page source comments are easy wins for leaked credentials.
+A web-based “command panel” is still just RCE — treat it like a shell, enumerate carefully even with single-command restrictions.
+sudo -l should always be checked immediately after landing a shell as any user.
+NOPASSWD: ALL in sudoers is a direct, zero-effort path to root — one of the most common misconfigurations in CTF rooms.
+Command execution interfaces that don’t sanitize input are effectively full RCE even without a “real” reverse shell.

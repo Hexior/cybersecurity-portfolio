@@ -1,6 +1,4 @@
 
-
-
 import base64
 
 print('1 - Encode\n2 - Decode')

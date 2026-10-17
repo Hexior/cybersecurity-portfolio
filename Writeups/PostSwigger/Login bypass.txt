@@ -1,0 +1,6 @@
+Lab 2: Login bypass
+1) Opened the login page
+2) Entered `administrator'--` into the Username field
+3) Entered anything into the Password field
+4) Logged in as administrator
+Payload: administrator'--

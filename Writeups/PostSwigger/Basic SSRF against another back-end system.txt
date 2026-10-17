@@ -1,0 +1,15 @@
+**Objective:** Force the server to make a request to an internal backend server (located on a different network) and delete the user `carlos`.
+
+**Vulnerability:** SSRF. The site features a "Check stock" function that accepts a URL via the `stockApi` parameter. However, in this case, `localhost` does not work; the target is located at a different internal IP address.
+
+**Steps taken:**
+1. Intercepted the request using Burp Suite.
+2. Replaced the `stockApi` value with `http://192.168.0.1:8080/admin` (iterating through IP addresses within the internal network).
+3. Identified a valid IP address that hosts the admin panel.
+4. Located the URL for deleting the user `carlos` within the HTML source code.
+5. Updated the `stockApi` parameter to `http://192.168.0.130:8080/admin/delete?username=carlos`.
+6. Sent the request, resulting in the deletion of the user.
+
+**Payload:** `stockApi=http://192.168.0.130:8080/admin/delete?username=carlos`
+
+**Reason for success:** The server has access to the internal network (`192.168.0.0/130`), and the `stockApi` parameter lacked validation to prevent requests to internal IP addresses.

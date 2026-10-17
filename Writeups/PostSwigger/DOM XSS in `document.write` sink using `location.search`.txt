@@ -1,0 +1,7 @@
+- **Goal:** Execute `alert(1)` via DOM-based XSS.
+- **Payload:** `<svg onload=alert(1)>` or `"><svg onload=alert(1)>`
+- **Steps:**
+1. Opened the lab.
+2. Replaced the `search` parameter in the URL with the payload.
+3. The alert appeared.
+- **Why it worked:** `document.write()` inserted the payload into the HTML, and the browser executed the JavaScript.

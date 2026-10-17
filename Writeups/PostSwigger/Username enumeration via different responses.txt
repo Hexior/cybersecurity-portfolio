@@ -1,0 +1,17 @@
+**Objective:** Identify a valid username and password by analyzing differences in server responses.
+
+**Vulnerability:** Username enumeration. The site provides different responses depending on whether a user exists or not.
+
+**Steps taken:**
+1. Entered `admin` with an arbitrary password → received an "Invalid username" response.
+2. Entered `nonexistentuser123` → received the same response.
+3. Intercepted the request using Burp and sent it to Intruder.
+4. Configured the payload position for the `username` parameter.
+5. Loaded a list of usernames (wordlist).
+6. Launched the attack and identified a username that yielded a **different** response (e.g., a different length or status code).
+7. Brute-forced the password for that username using Intruder.
+8. Successfully logged into the account.
+
+**Why it worked:** The site failed to mask the distinction between "user does not exist" and "incorrect password," which enabled the enumeration of usernames.
+
+**Payload:** A list of usernames processed via Burp Intruder.

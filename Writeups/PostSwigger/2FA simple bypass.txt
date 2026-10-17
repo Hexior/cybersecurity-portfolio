@@ -1,0 +1,13 @@
+**Purpose:** Bypass two-factor authentication.
+
+**Vulnerability:** Broken logic in 2FA. The site checks for 2FA only on the `/login2` page, but does not check if the user has passed this step when accessing other pages.
+
+**What I did:**
+1. Logged in with login/password.
+2. When the 2FA form appeared, I looked at the URL (`/login2`).
+3. Changed the URL to `/my-account`.
+4. The site let me go to the account page **without entering the 2FA code**.
+
+**Why it worked:** The site didn't check if the user passed 2FA on other pages. Therefore, it was possible to simply skip this step.
+
+**Payload:** URL change from `/login2` to `/my-account`.

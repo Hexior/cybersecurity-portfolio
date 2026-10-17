@@ -1,0 +1,18 @@
+**Purpose:** Read `/etc/passwd` file when `../` is locked.
+
+**Vulnerability:** Path Traversal. The filter blocks `../` but not absolute paths.
+
+**What I did:**
+1. He opened his mouth.
+2. Tried `filename=../../../etc/passwd` - blocked.
+3. Tried `filename=/etc/passwd` - it worked.
+4. I saw the contents of `/etc/passwd` in the response.
+
+
+**Payload:**
+/image?filename=/etc/passwd
+
+
+**Why it worked:**
+- Filter blocks `../` but not absolute paths.
+- The server takes `/etc/passwd` and returns its contents.

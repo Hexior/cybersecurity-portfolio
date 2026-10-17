@@ -1,0 +1,8 @@
+- **Goal:** Steal cookies via DOM-based XSS.
+- **Payload:** `javascript:alert(document.cookie)`
+- **Steps:**
+1. Opened the lab. 
+2. Replaced the `returnUrl` parameter in the URL with the payload. 
+3. Clicked the link that appeared. 
+4. An alert containing the cookies appeared.
+- **Why it worked:** jQuery changed the `href` attribute to `javascript:...`, and the browser executed the JavaScript upon clicking.

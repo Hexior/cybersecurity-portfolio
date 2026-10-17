@@ -1,0 +1,20 @@
+**Objective:** Read the `/etc/passwd` file via Path Traversal.
+
+**Vulnerability:** Path Traversal in the `filename` parameter.
+
+**Actions taken:**
+1. Opened the lab.
+2. Found the image URL: `/image?filename=1.jpg`.
+3. Changed `filename` to `../../../etc/passwd`.
+4. Sent the request.
+5. Observed the contents of `/etc/passwd` in the response.
+
+
+**Payload:**
+/image?filename=../../../etc/passwd
+
+
+**Why it worked:**
+- The server does not properly validate the `filename` parameter.
+- The `../` sequence allows navigation outside the intended directory.
+- The server returns the file's contents.

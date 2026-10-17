@@ -1,0 +1,24 @@
+**Goal:** Execute `alert(1)` via Reflected XSS in a scenario where `<` and `>` characters are escaped, but the input is inserted into a JavaScript string.
+
+**Vulnerability:** Reflected XSS within a JavaScript context. The site escapes `<` and `>`, but fails to escape single quotes (`'`), and it inserts user input into a JavaScript string.
+
+**Steps taken:**
+1. Opened the lab.
+2. Entered `';alert(1)//` into the search bar.
+3. The alert triggered.
+
+
+**Payload:**
+';alert(1)//
+
+
+**Why it worked:**
+- The JavaScript code on the site looked like this: `var search = 'YOUR_INPUT';`.
+- The `'` character closed the current string.
+- The `;` terminated the statement.
+- `alert(1)` executed the JavaScript.
+- The `//` commented out the remainder of the code (preventing syntax errors).
+
+
+**Alternative payload:**
+'-alert(1)-'

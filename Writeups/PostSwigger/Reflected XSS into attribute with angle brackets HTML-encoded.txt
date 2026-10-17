@@ -1,0 +1,23 @@
+**Goal:** Execute `alert(1)` via Reflected XSS, given that the characters `<` and `>` are escaped.
+
+**Vulnerability:** Reflected XSS within an HTML attribute. The site escapes `<` and `>`, but it **does not escape quotation marks** (`"`).
+
+**Steps taken:**
+1. Opened the lab.
+2. Entered `<script>alert(1)</script>` into the search bar — this did not work because the site escaped the tags.
+3. Inspected the page's HTML source — observed that the input is inserted into a `value` attribute:
+```html
+<input value="YOUR_INPUT">
+
+Tried the following payload:
+" onmouseover="alert(1)
+
+Hovered the mouse over the search field — the `alert` triggered.
+
+Payload:
+" onmouseover="alert(1)
+
+Why it worked:
+The quotation mark `"` closed the `value` attribute.
+A new attribute, `onmouseover="alert(1)"`, was then added.
+The browser interpreted this as a new attribute of the `<input>` tag, and executing the JavaScript upon a mouse hover event.

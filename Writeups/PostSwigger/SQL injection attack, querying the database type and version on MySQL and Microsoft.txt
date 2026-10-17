@@ -1,0 +1,18 @@
+**Objective:** Determine the type and version of the MySQL/Microsoft SQL Server database.
+
+**Vulnerability:** SQL Injection in the category filter.
+
+**Actions Taken:**
+1. Intercepted the request using Burp Suite.
+2. Tested the following payload:
+' UNION SELECT @@version, NULL#
+
+3. The response revealed the version: `8.0.42-0ubuntu0.20.04.1`.
+
+
+**Payload:**
+' UNION SELECT @@version, NULL#
+
+
+**Why it worked:**
+`@@version` is a system variable in MySQL/Microsoft SQL Server. The `#` symbol acts as a comment in MySQL (an alternative to `--`, but without requiring a trailing space).

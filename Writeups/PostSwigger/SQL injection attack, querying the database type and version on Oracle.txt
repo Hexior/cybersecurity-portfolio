@@ -1,0 +1,16 @@
+**Objective:** Determine the type and version of the Oracle database.
+
+**Vulnerability:** SQL Injection in the category filter.
+
+**Actions taken:**
+1. Intercepted the request using Burp Suite.
+2. Determined the number of columns using `ORDER BY`.
+3. Tested the following payload:
+' UNION SELECT banner, NULL FROM v$version--
+
+4. The response revealed the Oracle version: `Oracle Database 11g Express Edition Release 11.2.0.2.0`.
+
+**Payload:**
+' UNION SELECT banner, NULL FROM v$version--
+
+**Why it worked:** Oracle requires a table in a `SELECT` statement. The system table `v$version` contains the database version in the `banner` column.

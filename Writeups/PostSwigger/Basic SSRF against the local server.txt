@@ -1,0 +1,14 @@
+**Goal:** Force the server to make a request to `localhost` and gain access to the admin panel.
+
+**Vulnerability:** SSRF. The site features a "Check stock" function that accepts a URL via the `stockApi` parameter and makes a request on its own behalf.
+
+**Steps taken:**
+1. Opened the lab and clicked "Check stock" (selecting "London").
+2. Intercepted the request using Burp Suite.
+3. Identified the parameter `stockApi=http://stock.weliketoshop.net:8080/...`.
+4. Changed the value of `stockApi` to `http://localhost/admin`.
+5. Sent the request and accessed the admin panel page.
+
+**Payload:** `stockApi=http://localhost/admin`
+
+**Why it worked:** The server has access to `localhost`, and the `stockApi` parameter was not validated to prevent requests to internal URLs.

