@@ -12,16 +12,11 @@ This repository contains my Python scripts, CTF writeups, and lab writeups while
 
 ## Python Projects
 
-- [Recoon](Recoon.md)
-- [Base64 Encoder](Python/Base64_Encoder.md)
-- [Base64 Decoder](Python/Base64_Decoder.md)
-- [Basic Auth Generator](Python/Basic_Auth_Generator.md)
-- [Caesar Cipher](Python/Caesar_Cipher.md)
-- [Hashlib](Python/Hashlib.md)
+- [Python](Python/)
 
 ## CTF
 
-- [Writeups](CTF/)
+- [CTF](Writeups/CTF)
 
 ## Tools
 
